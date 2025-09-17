@@ -1,36 +1,48 @@
 pipeline {
-    agent any
+    agent any   // Run the pipeline on any available Jenkins agent
+
     tools {
-        maven '3.8.6'
+        maven '3.8.6'   // Use the Maven installation configured in Jenkins with the name "3.8.6"
     }
+
     stages {
+
         stage('Build') {
             steps {
+                // Compile and package the code into a .jar file
+                // -B = batch mode (no interactive input)
+                // -DskipTests = skips test execution during packaging
                 sh 'mvn -B -DskipTests clean package'
             }
         }
+
         stage('Test') {
             steps {
+                // Run unit tests using Maven
                 sh 'mvn test'
             }
             post {
                 always {
+                    // Publish JUnit test results to Jenkins (test reports in target/surefire-reports/*.xml)
                     junit 'target/surefire-reports/*.xml'
                 }
             }
         }
+
         stage('Deliver') {
             steps {
+                // Custom delivery script to deploy or release the app
                 sh './jenkins/scripts/deliver.sh'
             }
         }
+
         stage('Complete') {
             steps {
+                // Print completion messages in Jenkins console log
                 echo 'completed this simple java maven app!!!'
                 echo 'This looks pretty cool!'
                 echo 'succesfully built .jar app & ran it using the java -jar <filename> command !!'
             }
         }
-        
     }
 }
